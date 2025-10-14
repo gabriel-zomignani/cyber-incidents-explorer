@@ -14,4 +14,22 @@ def main():
     df = pd.read_csv(DATA, low_memory=False)
     print(f"loaded: {df.shape[0]} rows x {df.shape[1]} columns")
 
-    #drop 
+    #drop columns
+    for col in ["slug", "original_method"]:
+        if col in df.columns:
+            df = df.drop(columns=[col])
+            print(f"– Removed column: {col}")
+
+    #de duplicate just in case
+    before = len(df)
+    df = df.drop_duplicates()
+    print(f"– Duplicates removed: {before - len(df)}")
+
+    # save file
+    df.to_csv(OUT_FILE, index=False)
+    print(f"Saved cleaned dataset to: {OUT_FILE}")
+    print("Final shape:", df.shape)
+
+
+if __name__ == "__main__":
+    main()
