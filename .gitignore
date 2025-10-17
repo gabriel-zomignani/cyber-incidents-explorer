@@ -1,0 +1,31 @@
+# ==== Python ====
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ==== Virtual Environment ====
+.venv/
+venv/
+env/
+
+# ==== Data / Local DB ====
+db/
+*.sqlite3
+*.db
+
+# ==== Outputs ====
+outputs/*.csv
+outputs/*.xlsx
+outputs/*.log
+
+# ==== Jupyter / IPython ====
+.ipynb_checkpoints/
+*.ipynb
+
+# ==== VS Code ====
+.vscode/
+.settings/
+
+# ==== OS Files ====
+.DS_Store
+Thumbs.db
