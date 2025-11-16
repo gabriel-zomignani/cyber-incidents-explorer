@@ -1,3 +1,4 @@
+// ui/src/App.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -11,22 +12,24 @@ import AccountsPage from "./AccountsPage.jsx";
 import ChangePasswordPage from "./ChangePasswordPage.jsx";
 import TableViewPage from "./TableViewPage.jsx";
 import VisualizationView from "./VisualizationView.jsx";
+
+// ProtectedRoute exists but is now a simple passthrough
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 export default function App() {
   return (
     <div className="app-root">
+      {/* Single navbar at the top for all pages */}
       <Navigation />
 
       <Routes>
-        {/* Landing page – choose where to go */}
+        {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
-
-        {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
-        {/* Protected area */}
+        {/* Everything below is effectively public now because ProtectedRoute just returns children */}
+
         <Route
           path="/home"
           element={
@@ -63,9 +66,25 @@ export default function App() {
           }
         />
 
-        {/* 👉 YOUR PAGES – NOT protected for now */}
-        <Route path="/table-view" element={<TableViewPage />} />
-        <Route path="/visualizations" element={<VisualizationView />} />
+        {/* 👉 Your database table view */}
+        <Route
+          path="/table-view"
+          element={
+            <ProtectedRoute>
+              <TableViewPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 👉 Your pie chart view */}
+        <Route
+          path="/visualizations"
+          element={
+            <ProtectedRoute>
+              <VisualizationView />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );
