@@ -14,7 +14,7 @@ const INITIAL_USERS = [
     role: "admin"
   },
   {
-      id: 1, 
+    id: 2, 
     username: "analyst", 
     password: "analyst", 
     firstName: "Data analyst", 
@@ -26,23 +26,31 @@ const INITIAL_USERS = [
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const STORAGE_KEY_USERS = "cie_users";
   const STORAGE_KEY_SESSION = "cie_session";
 
   // Load users and session from localStorage on mount
   useEffect(() => {
+    let loadedUsers = INITIAL_USERS;
+    
     try {
       const raw = localStorage.getItem(STORAGE_KEY_USERS);
+      console.log("Loading users from localStorage:", raw);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length) setUsers(parsed);
+        if (Array.isArray(parsed) && parsed.length) {
+          loadedUsers = parsed;
+          console.log("Loaded users:", loadedUsers);
+        }
       }
     } catch (e) {
-      // ignore parse errors and keep INITIAL_USERS
-      // console.warn("Failed to load users from storage", e);
+      console.warn("Failed to load users from storage", e);
     }
+    
+    setUsers(loadedUsers);
 
     try {
       const sess = localStorage.getItem(STORAGE_KEY_SESSION);
@@ -52,14 +60,21 @@ export function AuthProvider({ children }) {
     } catch (e) {
       // ignore
     }
+    
+    setLoading(false);
   }, []);
 
   // Persist users to localStorage whenever users change
   useEffect(() => {
+    if (users.length === 0) {
+      console.log("Skipping save - users array is empty");
+      return;
+    }
     try {
+      console.log("Saving users to localStorage:", users);
       localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
     } catch (e) {
-      // ignore write errors
+      console.error("Failed to save users", e);
     }
   }, [users]);
 
@@ -139,6 +154,10 @@ export function AuthProvider({ children }) {
   const getUser = (id) => {
     return users.find(u => u.id === id);
   };
+
+  if (loading) {
+    return null; // or a loading spinner component
+  }
 
   return (
     <AuthContext.Provider value={{ user, login, logout, users, addUser, updateUser, deleteUser, getUser, resetPassword, changePassword }}>
