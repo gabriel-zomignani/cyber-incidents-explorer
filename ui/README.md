@@ -3,6 +3,11 @@
 This folder contains the React + Vite frontend for the Cyber Incidents Explorer project.
 
 ### Features
+- Login and Signup functions 
+- Admin and analyst roles for different access level
+- Interactive Pie Chart with filtering
+- Generate PDF report with Pie Chart 
+- Users management
 - Interactive data table displaying cyber events  
 - CSV data parsing using PapaParse  
 - Filter, search, and pagination support  
