@@ -39,7 +39,7 @@ Thumbs.db
 *.tmp
 __pycache__
 *.pkl
-*.json
+package-lock.json
 # Local artifacts
 outputs/
 reports/
