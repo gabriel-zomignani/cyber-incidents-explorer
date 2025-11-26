@@ -42,6 +42,35 @@ export default function ReportsPage() {
     }
   ];
 
+    const handleDownload = async (report) => {
+    try {
+      const res = await fetch(`/api/reports/${report.id}/download`, {
+        method: "GET",
+      });
+
+      if (!res.ok) {
+        throw new Error("Download failed");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = `${report.name}.pdf`; // change extension if needed
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      alert("Report downloaded successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Could not download report. Please try again.");
+    }
+  };
+
+
   return (
     <div className="app-container">
       <Navigation />
@@ -75,6 +104,10 @@ export default function ReportsPage() {
                     </td>
                     <td>
                       <button className="action-btn">View Details</button>
+                      <button
+                        className="action-btn"
+                        onClick={() => handleDownload(report)}
+                        >Download</button>
                     </td>
                   </tr>
                 ))}
