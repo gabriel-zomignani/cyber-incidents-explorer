@@ -69,31 +69,41 @@ export default function TableView({ rows }) {
 
   return (
     <div className="table-wrap">
-        <table>
-          <thead>
+      <table>
+        <thead>
+          <tr>
+            {columns.map((c) => (
+              <th key={c} onClick={() => toggleSort(c)}>
+                {c.replace(/_/g, " ")}
+                {sortBy === c ? (sortDir === "asc" ? " ▲" : " ▼") : ""}
+              </th>
+            ))}
+          </tr>
+        </thead>
+
+        <tbody>
+          {pageRows.length === 0 ? (
             <tr>
-              {columns.map((c) => (
-                <th key={c} onClick={() => toggleSort(c)}>
-                  {c.replace(/_/g, " ")}
-                  {sortBy === c ? (sortDir === "asc" ? " ▲" : " ▼") : ""}
-                </th>
-              ))}
+              <td colSpan={columns.length} className="empty">
+                No rows
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {pageRows.length === 0 ? (
-              <tr><td colSpan={columns.length} className="empty">No rows</td></tr>
-            ) : (
-              pageRows.map((r, i) => (
-                <tr key={start + i}>
-                  {columns.map((c) => (
-                    <td key={c}>{normalize(r[c])}</td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+          ) : (
+            pageRows.map((r, i) => (
+              <tr key={start + i}>
+                {columns.map((c) => (
+                  <td
+                    key={c}
+                    className={c === "description" ? "description-cell" : ""}
+                  >
+                    {normalize(r[c])}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 }

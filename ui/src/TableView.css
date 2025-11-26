@@ -1,0 +1,248 @@
+/* ========== PAGE LAYOUT ========== */
+
+.table-page {
+  min-height: 100vh;
+  padding: 1rem 0rem;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.table-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #f9fafb;
+}
+
+
+/* ========== FILTERS ========== */
+
+.table-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.table-input {
+  flex: 1 1 260px;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #4b5563;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.table-select {
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #4b5563;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.table-input:focus,
+.table-select:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.table-rows-count {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+
+/* ========== CARD WRAPPER ========== */
+
+.table-card {
+  margin-top: 0.75rem;
+  background: #030712;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.table-card-header {
+  padding: 0.8rem 1.2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+  background: #020617;
+}
+
+
+/* ========== SCROLL AREA ========== */
+
+.table-scroll {
+  max-height: 70vh;
+  overflow: auto;
+  position: relative;
+  
+}
+
+.table-wrap {
+    max-height: 70vh;
+    overflow: auto;
+    position: relative;
+}
+
+
+/* HEADER */
+.table-scroll thead th,
+.table-wrap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;                /* NEW: keep on top of rows */
+  background: #111827;
+  color: #e5e7eb;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 0.4rem 0.55rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.5);
+  cursor: pointer;
+}
+
+
+/* ========== TABLE BASE ========== */
+
+.table-scroll table,
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+
+/* ========== HEADER ========== */
+
+.table-scroll thead th,
+.table-wrap thead th {
+  position: sticky;
+  top: 0;
+  background: #111827;
+  color: #e5e7eb;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 0.4rem 0.55rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.5);
+  cursor: pointer;
+}
+
+.table-wrap thead th:hover {
+  background: #1f2937;
+}
+
+
+/* ========== BODY CELLS ========== */
+
+.table-scroll tbody td,
+.table-wrap tbody td {
+  padding: 0.35rem 0.55rem;
+  border-bottom: 1px solid rgba(31, 41, 55, 0.8);
+  vertical-align: top;
+  color: #e5e7eb;
+}
+
+.table-scroll tbody tr:nth-child(odd),
+.table-wrap tbody tr:nth-child(odd) {
+  background: #020617;
+}
+
+.table-scroll tbody tr:nth-child(even),
+.table-wrap tbody tr:nth-child(even) {
+  background: #050816;
+}
+
+.table-scroll tbody tr:hover,
+.table-wrap tbody tr:hover {
+  background: #111827;
+}
+
+
+/* ========== NARROW SMALL COLUMNS ========== */
+
+/* 1st column: event_date */
+.table-wrap th:nth-child(1),
+.table-wrap td:nth-child(1) {
+  width: 110px;
+  white-space: nowrap;
+}
+
+/* 2nd + 3rd columns: year + month */
+.table-wrap th:nth-child(2),
+.table-wrap td:nth-child(2),
+.table-wrap th:nth-child(3),
+.table-wrap td:nth-child(3) {
+  width: 60px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* industry code or other numeric columns */
+.table-wrap th:nth-child(7),
+.table-wrap td:nth-child(7) {
+  width: 70px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+
+/* ========== DESCRIPTION COLUMN EXPANDED ========== */
+
+.description-cell {
+  max-width: 420px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+
+/* ========== EMPTY ROW ========== */
+
+.empty {
+  text-align: center;
+  padding: 1rem;
+  color: #9ca3af;
+}
+
+
+/* ========== PAGER ========== */
+
+.pager {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.pager-btn {
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #4b5563;
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.pager-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pager-btn:not(:disabled):hover {
+  background: #111827;
+}
+
+.pager-info {
+  font-size: 0.85rem;
+  color: #d1d5db;
+  padding: 0 0.5rem;
+}
