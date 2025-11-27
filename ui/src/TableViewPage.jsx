@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
 import TableView from "./TableView";
+import "./TableView.css";
 
 // ==== CSV LOCATION ====
 const CSV_URL = "/data/cyber_clean.csv";
@@ -108,7 +109,14 @@ export default function TableViewPage() {
         <div style={{ color: "var(--muted)" }}>Rows: {total}</div>
       </div>
 
-      <TableView rows={pageRows} />
+        {/* Filters */}
+        <div className="table-filters">
+          <input
+            className="table-input"
+            placeholder="Search description or organization…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
 
       <div className="pager">
         <button onClick={() => setPage(1)} disabled={page === 1}>
