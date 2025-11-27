@@ -1,16 +1,6 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "./AuthContext";
+// ui/src/ProtectedRoute.jsx
 
-export default function ProtectedRoute({ element, allowedRoles }) {
-  const { user } = useAuth();
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />;
-  }
-
-  return element;
+// Simple version: no protection at all.
+export default function ProtectedRoute({ children }) {
+  return children;
 }

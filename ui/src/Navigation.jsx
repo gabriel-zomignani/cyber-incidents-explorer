@@ -20,7 +20,7 @@ export default function Navigation() {
   const handleMouseLeave = () => {
     closeTimeoutRef.current = setTimeout(() => {
       setVizDropdownOpen(false);
-    }, 150); // 150ms delay
+    }, 150);
   };
 
   const handleLogout = () => {
@@ -48,9 +48,18 @@ export default function Navigation() {
     <nav className="navbar">
       <div className="navbar-content">
         <h1 className="navbar-title">Cyber Security Events App</h1>
+
         <ul className="navbar-links">
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/reports">Reports</Link></li>
+          {/* public Home (landing) */}
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+
+          <li>
+            <Link to="/reports">Reports</Link>
+          </li>
+
+          {/* Visualization dropdown */}
           <li
             ref={dropdownRef}
             className="navbar-dropdown"
@@ -60,14 +69,24 @@ export default function Navigation() {
             <span className="navbar-dropdown-label">Visualization</span>
             {vizDropdownOpen && (
               <ul className="navbar-submenu">
-                <li><Link to="/visualization/table">Table View</Link></li>
-                <li><Link to="/visualization/pie-chart">Pie Chart</Link></li>
+                <li>
+                  <Link to="/table-view">Table View</Link>
+                </li>
+                <li>
+                  <Link to="/visualizations">Pie Chart</Link>
+                </li>
               </ul>
             )}
           </li>
+
+          {/* Admin-only link */}
           {user?.role === "admin" && (
-            <li><Link to="/accounts">User Management</Link></li>
+            <li>
+              <Link to="/accounts">User Management</Link>
+            </li>
           )}
+
+          {/* User menu: change password + logout */}
           {user && (
             <li
               className="navbar-dropdown user-dropdown"
@@ -83,8 +102,8 @@ export default function Navigation() {
                   fontWeight: 500,
                   fontSize: "1rem",
                   cursor: "pointer",
-                  padding: "0.25rem 1.2rem 0.25rem 1.2rem",
-                  borderRadius: "4px"
+                  padding: "0.25rem 1.2rem",
+                  borderRadius: "4px",
                 }}
                 onClick={() => setUserMenuOpen((open) => !open)}
                 aria-haspopup="true"
@@ -93,16 +112,40 @@ export default function Navigation() {
                 {user.username}
                 <span style={{ marginLeft: 8, fontSize: "0.9em" }}>▼</span>
               </button>
+
               {userMenuOpen && (
-                <ul className="navbar-submenu user-menu" style={{ minWidth: 180, right: 0, left: "auto", marginTop: 8, padding: 0 }}>
+                <ul
+                  className="navbar-submenu user-menu"
+                  style={{
+                    minWidth: 180,
+                    right: 0,
+                    left: "auto",
+                    marginTop: 8,
+                    padding: 0,
+                  }}
+                >
                   <li style={{ padding: 0, margin: 0 }}>
-                    <Link to="/change-password" style={{ padding: "0.75rem 1.5rem", display: "block", color: "white", textDecoration: "none", fontWeight: 400, fontSize: "1rem" }} onClick={() => setUserMenuOpen(false)}>
+                    <Link
+                      to="/change-password"
+                      style={{
+                        padding: "0.75rem 1.5rem",
+                        display: "block",
+                        color: "white",
+                        textDecoration: "none",
+                        fontWeight: 400,
+                        fontSize: "1rem",
+                      }}
+                      onClick={() => setUserMenuOpen(false)}
+                    >
                       Change Password
                     </Link>
                   </li>
                   <li style={{ padding: 0, margin: 0 }}>
                     <button
-                      onClick={() => { setUserMenuOpen(false); handleLogout(); }}
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        handleLogout();
+                      }}
                       style={{
                         background: "none",
                         border: "none",
@@ -112,7 +155,7 @@ export default function Navigation() {
                         fontWeight: 400,
                         padding: "0.75rem 1.5rem",
                         width: "100%",
-                        textAlign: "left"
+                        textAlign: "left",
                       }}
                     >
                       Logout

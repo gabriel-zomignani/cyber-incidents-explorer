@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import Navigation from "./Navigation";
+
 import "./HomePage.css";
 
 export default function HomePage() {
