@@ -1,46 +1,63 @@
+import { useState, useEffect } from "react";
 import Navigation from "./Navigation";
 import "./HomePage.css";
 import "./ReportsPage.css";
 
 export default function ReportsPage() {
-  // Hardcoded dummy data as requested
-  const reports = [
-    {
-      id: 1,
-      name: "Q3 Security Audit",
-      description: "Comprehensive security audit for Q3 2024 including vulnerability assessment.",
-      date: "2024-10-15",
-      status: "Completed"
-    },
-    {
-      id: 2,
-      name: "Incident #402 Analysis",
-      description: "Post-mortem analysis of the phishing attempt detected on Oct 12.",
-      date: "2024-10-13",
-      status: "Pending"
-    },
-    {
-      id: 3,
-      name: "Weekly Threat Summary",
-      description: "Summary of blocked IPs and failed login attempts for the week of Oct 7.",
-      date: "2024-10-10",
-      status: "Completed"
-    },
-    {
-      id: 4,
-      name: "User Access Review",
-      description: "Quarterly review of privileged user accounts and permissions.",
-      date: "2024-09-30",
-      status: "Completed"
-    },
-    {
-      id: 5,
-      name: "Firewall Configuration Backup",
-      description: "Routine backup of firewall rules and configurations.",
-      date: "2024-09-28",
-      status: "Completed"
-    }
-  ];
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch("/data/reports.json")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch reports");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setReports(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading reports:", err);
+        setError("Failed to load reports. Please try again later.");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="app-container">
+        <Navigation />
+        <div className="main-content">
+          <div className="reports-container">
+            <div className="reports-header">
+              <h2>Generated Reports</h2>
+            </div>
+            <div className="loading-state">Loading reports...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="app-container">
+        <Navigation />
+        <div className="main-content">
+          <div className="reports-container">
+            <div className="reports-header">
+              <h2>Generated Reports</h2>
+            </div>
+            <div className="error-message">{error}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
