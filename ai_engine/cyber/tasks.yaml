@@ -1,0 +1,27 @@
+analysis_task:
+  description: >
+    Analyze the cyber incidents database to answer: {question}
+    
+    Use the available database tools strategically:
+    - query_cyber_data: Get overview, top countries, top attack types
+    - temporal_analysis: Examine time-based trends and patterns
+    - geographic_analysis: Analyze regional distribution and country-specific patterns
+    - correlation_analysis: Find relationships between different attributes
+    - get_summary_statistics: Get comprehensive dataset statistics
+    
+    Provide a clear, well-structured answer that includes:
+    1. Direct answer to the question with supporting data
+    2. Key patterns and trends discovered
+    3. Relevant statistics and metrics
+    4. Strategic insights and implications
+    5. Conclusions and recommendations
+    
+    Format the response to be accessible to both technical and executive audiences.
+  expected_output: >
+    A comprehensive analysis report containing:
+    - Executive summary with direct answer to the question
+    - Supporting data, statistics, and evidence from the database
+    - Key findings and patterns (temporal, geographic, correlations as relevant)
+    - Strategic insights and implications
+    - Clear conclusions and actionable recommendations
+    - Professional formatting suitable for stakeholders
