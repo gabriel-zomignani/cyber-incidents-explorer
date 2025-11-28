@@ -1,31 +1,91 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./AuthContext";
-import ProtectedRoute from "./ProtectedRoute";
-import LoginPage from "./LoginPage";
-import SignupPage from "./SignupPage";
-import HomePage from "./HomePage";
-import ReportsPage from "./ReportsPage";
-import TableViewPage from "./TableViewPage";
-import PieChartView from "./PieChartView";
-import AccountsPage from "./AccountsPage";
-import ChangePasswordPage from "./ChangePasswordPage";
-import "./App.css";
+// ui/src/App.jsx
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+
+import Navigation from "./Navigation.jsx";
+import LandingPage from "./LandingPage.jsx";
+import HomePage from "./HomePage.jsx";
+import LoginPage from "./LoginPage.jsx";
+import SignupPage from "./SignupPage.jsx";
+import ReportsPage from "./ReportsPage.jsx";
+import AccountsPage from "./AccountsPage.jsx";
+import ChangePasswordPage from "./ChangePasswordPage.jsx";
+import TableViewPage from "./TableViewPage.jsx";
+import VisualizationView from "./VisualizationView.jsx";
+
+// ProtectedRoute exists but is now a simple passthrough
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 export default function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/" element={<ProtectedRoute element={<HomePage />} allowedRoles={["admin", "analyst"]} />} />
-          <Route path="/reports" element={<ProtectedRoute element={<ReportsPage />} allowedRoles={["admin", "analyst"]} />} />
-          <Route path="/visualization/table" element={<ProtectedRoute element={<TableViewPage />} allowedRoles={["admin", "analyst"]} />} />
-          <Route path="/visualization/pie-chart" element={<ProtectedRoute element={<PieChartView />} allowedRoles={["admin", "analyst"]} />} />
-          <Route path="/accounts" element={<ProtectedRoute element={<AccountsPage />} allowedRoles={["admin"]} />} />
-          <Route path="/change-password" element={<ProtectedRoute element={<ChangePasswordPage />} allowedRoles={["admin", "analyst"]} />} />
-        </Routes>
-      </AuthProvider>
-    </Router>
+    <div className="app-root">
+      {/* Single navbar at the top for all pages */}
+      <Navigation />
+
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+
+        {/* Everything below is effectively public now because ProtectedRoute just returns children */}
+
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <ReportsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/accounts"
+          element={
+            <ProtectedRoute>
+              <AccountsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePasswordPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 👉 Your database table view */}
+        <Route
+          path="/table-view"
+          element={
+            <ProtectedRoute>
+              <TableViewPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 👉 Your pie chart view */}
+        <Route
+          path="/visualizations"
+          element={
+            <ProtectedRoute>
+              <VisualizationView />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </div>
   );
 }

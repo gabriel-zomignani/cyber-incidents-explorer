@@ -92,6 +92,10 @@ export default function ReportsPage() {
                     </td>
                     <td>
                       <button className="action-btn">View Details</button>
+                      <button
+                        className="action-btn"
+                        onClick={() => handleDownload(report)}
+                      >Download</button>
                     </td>
                   </tr>
                 ))}
