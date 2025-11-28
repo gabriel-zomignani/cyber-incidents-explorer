@@ -2,3 +2,15 @@ pandas
 python-dateutil
 sqlalchemy
 openpyxl
+crewai
+crewai-tools
+flask
+flask-cors
+python-dotenv
+langchain-openai
+pyyaml
+crewai
+crewai-tools
+flask
+flask-cors
+python-dotenv
