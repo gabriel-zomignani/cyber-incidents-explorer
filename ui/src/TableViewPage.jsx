@@ -70,8 +70,10 @@ export default function TableViewPage() {
     <div className="page">
       <h1>Cyber Events — Table</h1>
 
+      {/* Filters & controls */}
       <div className="controls">
         <input
+          className="table-input"
           placeholder="Search description or organization…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -109,15 +111,10 @@ export default function TableViewPage() {
         <div style={{ color: "var(--muted)" }}>Rows: {total}</div>
       </div>
 
-        {/* Filters */}
-        <div className="table-filters">
-          <input
-            className="table-input"
-            placeholder="Search description or organization…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
+      {/* Table */}
+      <TableView rows={pageRows} />
 
+      {/* Pager */}
       <div className="pager">
         <button onClick={() => setPage(1)} disabled={page === 1}>
           « First
