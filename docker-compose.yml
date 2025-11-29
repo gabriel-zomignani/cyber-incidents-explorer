@@ -39,7 +39,7 @@ services:
       - VITE_API_URL=http://localhost:5000
     volumes:
       # Mount UI code for hot reload in development
-      - ./ui:/app:ro
+      - ./ui:/app:rw
       - /app/node_modules
     networks:
       - cyber-events-network
