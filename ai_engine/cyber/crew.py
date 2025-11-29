@@ -44,7 +44,8 @@ class CyberAnalysisCrew():
             model=ollama_model,  # CrewAI needs ollama/ prefix for LiteLLM routing
             base_url=ollama_host,
             api_key="no-key",  # Ollama doesn't need real key
-            temperature=0.7
+            temperature=0.7,
+            timeout=300  # 5 minute timeout for LLM calls (handles cold start)
         )
         
         # Database query tools for the analyst

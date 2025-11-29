@@ -9,6 +9,7 @@ import TableViewPage from "./TableViewPage";
 import PieChartView from "./PieChartView";
 import AccountsPage from "./AccountsPage";
 import ChangePasswordPage from "./ChangePasswordPage";
+import AIPage from "./AIPage";
 import "./App.css";
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/visualization/pie-chart" element={<ProtectedRoute element={<PieChartView />} allowedRoles={["admin", "analyst"]} />} />
           <Route path="/accounts" element={<ProtectedRoute element={<AccountsPage />} allowedRoles={["admin"]} />} />
           <Route path="/change-password" element={<ProtectedRoute element={<ChangePasswordPage />} allowedRoles={["admin", "analyst"]} />} />
+          <Route path="/ai" element={<ProtectedRoute element={<AIPage />} allowedRoles={["admin", "analyst"]} />} />
         </Routes>
       </AuthProvider>
     </Router>

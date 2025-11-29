@@ -15,6 +15,18 @@ from ai_engine.cyber import CyberAnalysisCrew
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
+import threading
+import uuid
+from typing import Dict
+
+# In-memory job store for async analysis (simple single-instance approach)
+JOBS: Dict[str, dict] = {}
+JOBS_LOCK = threading.Lock()
+
+# Configure longer timeout for AI analysis requests
+# First-time Ollama model loading can take 30-60 seconds
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config['REQUEST_TIMEOUT'] = 300  # 5 minutes for complex analysis
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -53,9 +65,14 @@ def analyze_question():
         
         # Initialize and run the crew
         # Note: This can take 1-2 minutes depending on question complexity
+        # First-time runs may take longer as Ollama loads the model into memory
         print(f"Analyzing question: {question}")
+        print("Initializing CrewAI agents...")
         crew = CyberAnalysisCrew()
+        
+        print("Starting analysis (this may take 1-2 minutes)...")
         result = crew.kickoff(inputs={'question': question})
+        print("Analysis complete!")
         
         return jsonify({
             'success': True,
@@ -72,6 +89,58 @@ def analyze_question():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@app.route('/api/analyze_async', methods=['POST'])
+def analyze_async():
+    """Start analysis in background and return a job id immediately."""
+    try:
+        data = request.json
+        question = data.get('question', '').strip()
+        if not question:
+            return jsonify({'success': False, 'error': 'Question is required'}), 400
+
+        job_id = str(uuid.uuid4())
+        with JOBS_LOCK:
+            JOBS[job_id] = {'status': 'pending', 'result': None, 'error': None}
+
+        def run_job(jid, q):
+            try:
+                with JOBS_LOCK:
+                    JOBS[jid]['status'] = 'running'
+                crew = CyberAnalysisCrew()
+                res = crew.kickoff(inputs={'question': q})
+                with JOBS_LOCK:
+                    JOBS[jid]['status'] = 'done'
+                    JOBS[jid]['result'] = str(res)
+            except Exception as ex:
+                with JOBS_LOCK:
+                    JOBS[jid]['status'] = 'error'
+                    JOBS[jid]['error'] = str(ex)
+
+        t = threading.Thread(target=run_job, args=(job_id, question), daemon=True)
+        t.start()
+
+        return jsonify({'success': True, 'job_id': job_id}), 202
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analyze_status/<job_id>', methods=['GET'])
+def analyze_status(job_id):
+    """Return status and result (if ready) for a background job."""
+    with JOBS_LOCK:
+        job = JOBS.get(job_id)
+    if not job:
+        return jsonify({'success': False, 'error': 'Job not found'}), 404
+
+    payload = {'success': True, 'status': job['status']}
+    if job['status'] == 'done':
+        payload['result'] = job['result']
+    if job['status'] == 'error':
+        payload['error'] = job['error']
+
+    return jsonify(payload)
 
 @app.route('/api/examples', methods=['GET'])
 def get_example_questions():
