@@ -43,6 +43,14 @@ The Cyber Security Events App is a full-stack application that combines data eng
   ```bash
   brew install ollama
   ollama serve
+  ```
+  On another terminal:
+  This will produce a link. Follow the link and login with your credentails. This will create a Device API key automatically. 
+  ```bash
+  ollama signin
+  ```
+  Pull cloud model. 
+  ```
   ollama pull gpt-oss:120b-cloud
   ```
 
@@ -123,9 +131,14 @@ brew install ollama
 
 # Start Ollama server
 ollama serve
-
-# Pull the AI model (requires signin)
+```
+On another terminal:
+This will produce a link. Follow the link and login with your credentails. This will create a Device API key automatically. 
+```bash
 ollama signin
+```
+Pull cloud model. 
+```
 ollama pull gpt-oss:120b-cloud
 ```
 
