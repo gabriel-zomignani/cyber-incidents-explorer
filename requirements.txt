@@ -4,6 +4,7 @@ sqlalchemy
 openpyxl
 crewai
 crewai-tools
+litellm
 python-dotenv
 langchain-openai
 pyyaml
