@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 import pandas as pd
 from sqlalchemy import create_engine
-from crewai_tools import tool
+from crewai.tools import tool
 
 # Path to the SQLite database
 DB_PATH = Path(__file__).parent.parent.parent.parent / "db" / "cyber.db"

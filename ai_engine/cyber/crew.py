@@ -36,11 +36,13 @@ class CyberAnalysisCrew():
         with open(config_dir / 'tasks.yaml', 'r') as f:
             self.tasks_config = yaml.safe_load(f)
         
-        # Initialize LLM - using Ollama with deepseek-r1:14b locally
+        # Initialize LLM - using Ollama with configurable model
         # Deepseek has better reasoning capabilities than llama3.1
+        ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
+        ollama_model = os.getenv('OLLAMA_MODEL', 'ollama/gpt-oss:120b-cloud')
         self.llm = LLM(
-            model="ollama/gpt-oss:120b-cloud",  # CrewAI needs ollama/ prefix for LiteLLM routing
-            base_url="http://localhost:11434",
+            model=ollama_model,  # CrewAI needs ollama/ prefix for LiteLLM routing
+            base_url=ollama_host,
             api_key="no-key",  # Ollama doesn't need real key
             temperature=0.7
         )

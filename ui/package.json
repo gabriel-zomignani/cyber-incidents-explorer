@@ -1,7 +1,7 @@
 {
   "name": "ui",
   "version": "1.0.0",
-  "description": "This folder contains the React + Vite frontend for the Cyber Incidents Explorer project.",
+  "description": "This folder contains the React + Vite frontend for the Cyber Security Events App project.",
   "license": "ISC",
   "author": "",
   "type": "commonjs",

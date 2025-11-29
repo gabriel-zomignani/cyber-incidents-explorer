@@ -1,5 +1,5 @@
 """
-Flask API Server for Cyber Incidents Explorer
+Flask API Server for Cyber Security Events App
 Connects the React frontend with the CrewAI backend
 """
 from flask import Flask, request, jsonify
@@ -7,9 +7,6 @@ from flask_cors import CORS
 import sys
 import os
 from pathlib import Path
-
-# Set Ollama host before importing CrewAI
-os.environ['OLLAMA_HOST'] = 'http://localhost:11434'
 
 # Add parent directory to path to import ai_engine
 sys.path.append(str(Path(__file__).parent.parent))
@@ -24,7 +21,7 @@ def health_check():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
-        'service': 'Cyber Incidents Analysis API'
+        'service': 'Cyber Security Events Analysis API'
     })
 
 @app.route('/api/analyze', methods=['POST'])
@@ -95,8 +92,10 @@ def get_example_questions():
     })
 
 if __name__ == '__main__':
-    print("Starting Cyber Incidents Analysis API...")
-    print("Using Ollama LLM at: localhost:11434")
-    print("Model: gpt-oss:120b-cloud")
+    ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
+    ollama_model = os.getenv('OLLAMA_MODEL', 'ollama/gpt-oss:120b-cloud')
+    print("Starting Cyber Security Events Analysis API...")
+    print(f"Using Ollama LLM at: {ollama_host}")
+    print(f"Model: {ollama_model}")
     print("API will be available at http://localhost:5000")
     app.run(debug=True, port=5000, host='0.0.0.0')
