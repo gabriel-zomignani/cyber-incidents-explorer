@@ -65,6 +65,7 @@ export default function Navigation() {
               </ul>
             )}
           </li>
+          <li><Link to="/ai">AI</Link></li>
           {user?.role === "admin" && (
             <li><Link to="/accounts">User Management</Link></li>
           )}
