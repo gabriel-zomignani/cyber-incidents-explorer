@@ -70,10 +70,14 @@ class CyberAnalysisCrew():
     @task
     def analysis_task(self) -> Task:
         # Comprehensive analysis task
+        # Generate a timestamped report filename so runs do not overwrite previous reports
+        from datetime import datetime
+        ts = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+        out_name = f'reports/cyber_analysis_report_{ts}.md'
         return Task(
             config=self.tasks_config['analysis_task'],
             agent=self.cyber_analyst(),
-            output_file='reports/cyber_analysis_report.md'
+            output_file=out_name
         )
     
     @crew

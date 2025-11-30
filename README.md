@@ -66,6 +66,10 @@ The Cyber Security Events App is a full-stack application that combines data eng
    ```bash
    docker compose up --build
    ```
+   or use docker-compose-dockerhub.yml to run with Dockerhub images
+   ```bash
+   docker compose up -f docker-compose-dockerhub.yml --build
+   ```   
 
 3. **Access the application**
    - **Web UI**: http://localhost:5173
