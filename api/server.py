@@ -2,11 +2,12 @@
 Flask API Server for Cyber Security Events App
 Connects the React frontend with the CrewAI backend
 """
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sys
 import os
 from pathlib import Path
+from datetime import datetime
 
 # Add parent directory to path to import ai_engine
 sys.path.append(str(Path(__file__).parent.parent))
@@ -18,6 +19,9 @@ CORS(app)  # Enable CORS for React frontend
 import threading
 import uuid
 from typing import Dict
+
+# Reports directory (mounted via Docker or local)
+REPORTS_DIR = (Path(__file__).parent.parent / "reports").resolve()
 
 # In-memory job store for async analysis (simple single-instance approach)
 JOBS: Dict[str, dict] = {}
@@ -159,6 +163,49 @@ def get_example_questions():
     return jsonify({
         'examples': examples
     })
+
+
+def _humanize_filename(filename: str) -> str:
+    """Convert a filename into a friendlier display name."""
+    stem = Path(filename).stem
+    friendly = stem.replace('_', ' ').replace('-', ' ').strip()
+    return friendly.title() if friendly else filename
+
+
+@app.route('/api/reports', methods=['GET'])
+def list_reports():
+    """List available report files from the reports directory."""
+    if not REPORTS_DIR.exists() or not REPORTS_DIR.is_dir():
+        return jsonify({'reports': []})
+
+    reports = []
+    for f in REPORTS_DIR.iterdir():
+        if not f.is_file():
+            continue
+        try:
+            mtime = datetime.fromtimestamp(f.stat().st_mtime).isoformat()
+        except Exception:
+            mtime = None
+        reports.append({
+            'id': f.name,
+            'name': _humanize_filename(f.name),
+            'description': 'Generated report from ETL pipeline',
+            'dateGenerated': mtime,
+            'status': 'Completed'
+        })
+
+    return jsonify({'reports': reports})
+
+
+@app.route('/api/reports/<report_id>/download', methods=['GET'])
+def download_report(report_id):
+    """Download a specific report file by id (filename)."""
+    # Prevent path traversal by resolving and ensuring directory containment
+    target_path = (REPORTS_DIR / report_id).resolve()
+    if not str(target_path).startswith(str(REPORTS_DIR)) or not target_path.is_file():
+        return jsonify({'success': False, 'error': 'Report not found'}), 404
+
+    return send_from_directory(REPORTS_DIR, report_id, as_attachment=True)
 
 if __name__ == '__main__':
     ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')

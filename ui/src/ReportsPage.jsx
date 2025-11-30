@@ -1,75 +1,45 @@
+import { useEffect, useMemo, useState } from "react";
 import Navigation from "./Navigation";
 import "./HomePage.css";
 import "./ReportsPage.css";
 
 export default function ReportsPage() {
-  // Hardcoded dummy data as requested
-  const reports = [
-    {
-      id: 1,
-      name: "Q3 Security Audit",
-      description: "Comprehensive security audit for Q3 2024 including vulnerability assessment.",
-      date: "2024-10-15",
-      status: "Completed"
-    },
-    {
-      id: 2,
-      name: "Incident #402 Analysis",
-      description: "Post-mortem analysis of the phishing attempt detected on Oct 12.",
-      date: "2024-10-13",
-      status: "Pending"
-    },
-    {
-      id: 3,
-      name: "Weekly Threat Summary",
-      description: "Summary of blocked IPs and failed login attempts for the week of Oct 7.",
-      date: "2024-10-10",
-      status: "Completed"
-    },
-    {
-      id: 4,
-      name: "User Access Review",
-      description: "Quarterly review of privileged user accounts and permissions.",
-      date: "2024-09-30",
-      status: "Completed"
-    },
-    {
-      id: 5,
-      name: "Firewall Configuration Backup",
-      description: "Routine backup of firewall rules and configurations.",
-      date: "2024-09-28",
-      status: "Completed"
-    }
-  ];
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleDownload = async (report) => {
-    try {
-      const res = await fetch(`/api/reports/${report.id}/download`, {
-        method: "GET",
-      });
+  const API_BASE = useMemo(
+    () => import.meta.env.VITE_API_URL ?? `${window.location.protocol}//${window.location.hostname}:5000`,
+    []
+  );
 
-      if (!res.ok) {
-        throw new Error("Download failed");
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(`${API_BASE}/api/reports`);
+        if (!res.ok) {
+          throw new Error("Failed to load reports");
+        }
+        const data = await res.json();
+        setReports(Array.isArray(data?.reports) ? data.reports : []);
+      } catch (err) {
+        console.error(err);
+        setError("Could not load reports. Please try again.");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
+    load();
+  }, [API_BASE]);
 
-      a.href = url;
-      a.download = `${report.name}.pdf`; // change extension if needed
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-      alert("Report downloaded successfully");
-    } catch (err) {
-      console.error(err);
-      alert("Could not download report. Please try again.");
-    }
+  const handleViewDetails = (report) => {
+    alert(
+      `Report: ${report.name}\nDescription: ${report.description}\nDate: ${report.dateGenerated ?? "N/A"}\nStatus: ${report.status}`
+    );
   };
-
 
   return (
     <div className="app-container">
@@ -81,38 +51,58 @@ export default function ReportsPage() {
           </div>
 
           <div className="reports-table-container">
-            <table className="reports-table">
-              <thead>
-                <tr>
-                  <th>Report Name</th>
-                  <th>Description</th>
-                  <th>Date Generated</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reports.map((report) => (
-                  <tr key={report.id}>
-                    <td className="report-name-cell">{report.name}</td>
-                    <td className="report-desc-cell">{report.description}</td>
-                    <td className="report-date-cell">{report.date}</td>
-                    <td>
-                      <span className={`status-badge ${report.status === 'Completed' ? 'status-completed' : 'status-pending'}`}>
-                        {report.status}
-                      </span>
-                    </td>
-                    <td>
-                      <button className="action-btn">View Details</button>
-                      <button
-                        className="action-btn"
-                        onClick={() => handleDownload(report)}
-                      >Download</button>
-                    </td>
+            {loading ? (
+              <div className="reports-table">
+                <div style={{ padding: "1.5rem" }}>Loading...</div>
+              </div>
+            ) : error ? (
+              <div className="reports-table">
+                <div style={{ padding: "1.5rem", color: "var(--accent-warning)" }}>{error}</div>
+              </div>
+            ) : (
+              <table className="reports-table">
+                <thead>
+                  <tr>
+                    <th>Report Name</th>
+                    <th>Description</th>
+                    <th>Date Generated</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {reports.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ padding: "1.5rem" }}>No reports available.</td>
+                    </tr>
+                  ) : (
+                    reports.map((report) => (
+                      <tr key={report.id}>
+                        <td className="report-name-cell">{report.name}</td>
+                        <td className="report-desc-cell">{report.description}</td>
+                        <td className="report-date-cell">{report.dateGenerated || "N/A"}</td>
+                        <td>
+                          <span className={`status-badge ${report.status === 'Completed' ? 'status-completed' : 'status-pending'}`}>
+                            {report.status}
+                          </span>
+                        </td>
+                        <td>
+                          <button className="action-btn" onClick={() => handleViewDetails(report)}>
+                            View Details
+                          </button>
+                          <a
+                            className="action-btn"
+                            href={`${API_BASE}/api/reports/${encodeURIComponent(report.id)}/download`}
+                          >
+                            Download
+                          </a>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>
