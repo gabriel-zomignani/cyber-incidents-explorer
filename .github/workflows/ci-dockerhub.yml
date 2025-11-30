@@ -1,0 +1,120 @@
+name: CI Build & Push to Docker Hub
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [published]
+
+jobs:
+  backend-test:
+    name: Backend tests (pytest + coverage)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Test with pytest
+        run: |
+          pip install pytest
+          PYTHONPATH="$GITHUB_WORKSPACE" pytest --junitxml=junit/test-results.xml
+
+      - name: Upload pytest results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: junit/test-results.xml
+
+  frontend-build:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ui/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('ui/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install UI deps
+        working-directory: ui
+        run: npm install --no-audit --no-fund
+
+      - name: Build UI
+        working-directory: ui
+        run: npm run build
+
+      - name: Upload UI dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-dist
+          path: ui/dist
+
+  build-and-push:
+    name: Build and push Docker images to Docker Hub
+    needs: [ backend-test, frontend-build ]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.api
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/cyber-api:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/cyber-api:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/cyber-api:${{ github.event.release.tag_name || github.sha }}
+
+      - name: Build and push UI image 
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.ui
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/cyber-ui:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/cyber-ui:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/cyber-ui:${{ github.event.release.tag_name || github.sha }}
+
+      - name: Summary
+        run: echo "Pushed Docker images for ${{ github.sha }} to Docker Hub"
