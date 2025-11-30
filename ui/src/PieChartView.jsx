@@ -6,7 +6,16 @@ import "./VisualizationView.css";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-const COLORS = ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#43e97b", "#fa709a", "#fee140", "#30cfd0"];
+const COLORS = [
+  "#0070f3", // Blue
+  "#7928ca", // Purple
+  "#00e0b8", // Teal
+  "#3291ff", // Light Blue
+  "#ff0061", // Pink/Red
+  "#f5a623", // Orange
+  "#50e3c2", // Mint
+  "#bd10e0"  // Violet
+];
 
 export default function PieChartView() {
   const [data, setData] = useState([]);
@@ -47,7 +56,7 @@ export default function PieChartView() {
   const filteredData = useMemo(() => {
     return data.filter(row => {
       const matchesCountry = !selectedCountry || row.country === selectedCountry;
-      
+
       // Date filtering
       let matchesDate = true;
       if (startDate || endDate) {
@@ -59,7 +68,7 @@ export default function PieChartView() {
           matchesDate = false;
         }
       }
-      
+
       return matchesCountry && matchesDate && row[selectedFeature]; // Only include rows with the selected feature
     });
   }, [data, selectedCountry, selectedFeature, startDate, endDate]);
@@ -70,7 +79,7 @@ export default function PieChartView() {
       const value = row[selectedFeature] || "Unknown";
       featureCounts[value] = (featureCounts[value] || 0) + 1;
     });
-    
+
     return Object.entries(featureCounts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
@@ -125,7 +134,7 @@ export default function PieChartView() {
       <div className="main-content">
         <div className="content-card">
           <h2>Incident Distribution Analysis</h2>
-          
+
           <div className="controls">
             <div className="control-group">
               <label htmlFor="feature">Visualize By:</label>

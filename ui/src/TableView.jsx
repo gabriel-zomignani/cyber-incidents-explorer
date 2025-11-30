@@ -94,7 +94,8 @@ export default function TableView({ rows }) {
                 {columns.map((c) => (
                   <td
                     key={c}
-                    className={c === "description" ? "description-cell" : ""}
+                    className={`cell-${c}`}
+                    title={normalize(r[c])}
                   >
                     {normalize(r[c])}
                   </td>

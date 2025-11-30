@@ -1,103 +1,21 @@
-/* User menu dropdown (right side) */
-.user-dropdown {
-  position: relative;
-}
-.user-menu {
-  right: 0;
-  left: auto;
-  min-width: 180px;
-  background: rgba(102, 126, 234, 0.98);
-  border-radius: 0 0 8px 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  margin-top: 8px;
-  position: absolute;
-  z-index: 20;
-  padding: 0;
-}
-.user-menu li {
-  padding: 0;
-  margin: 0;
-}
-.user-menu a,
-.user-menu button {
-  display: block;
-  color: white;
-  text-decoration: none;
-  font-weight: 400;
-  padding: 0.75rem 1.5rem;
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s ease;
-  border-radius: 0;
-  margin: 0;
-}
-.user-menu a:hover,
-.user-menu button:hover {
-  background: rgba(118, 75, 162, 0.92);
-  color: #fff;
-}
-.user-menu a,
-.user-menu button {
-  background: none;
-  border: none;
-  outline: none;
-  color: white;
-  font-weight: 400;
-  font-size: 1rem;
-  width: 100%;
-  text-align: left;
-  padding: 0.75rem 1.5rem;
-  margin: 0;
-  border-radius: 0;
-  transition: background 0.2s, color 0.2s;
-  cursor: pointer;
-  box-sizing: border-box;
-  display: block;
-}
-.user-menu a:active,
-.user-menu button:active {
-  background: rgba(118, 75, 162, 0.92);
-  color: #fff;
-}
-.user-menu a:hover,
-.user-menu button:hover {
-  background: rgba(118, 75, 162, 0.92);
-  color: #fff;
-}
-.user-menu-trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  background: none;
-  border: none;
-  color: white;
-  font-weight: 500;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 0.25rem 1.2rem;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
-.user-menu-trigger:focus, .user-menu-trigger:active {
-  background: rgba(102, 126, 234, 0.18);
-  outline: none;
-}
 /* Navigation Bar */
 .navbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
+  height: 70px;
+  display: flex;
+  align-items: center;
 }
 
 .navbar-content {
-  max-width: 1200px;
+  max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
@@ -107,8 +25,13 @@
 
 .navbar-title {
   margin: 0;
-  color: white;
-  font-size: 1.5rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .navbar-links {
@@ -117,49 +40,109 @@
   padding: 0;
   display: flex;
   gap: 2rem;
+  align-items: center;
 }
 
 .navbar-links a {
-  color: white;
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
-  transition: opacity 0.3s ease;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  padding: 0.5rem 0;
+  position: relative;
 }
 
-.navbar-links a:hover {
-  opacity: 0.8;
+.navbar-links a:hover,
+.navbar-links a.active {
+  color: var(--text-primary);
+}
+
+.navbar-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent-primary);
+  transition: width 0.2s ease;
+  border-radius: 2px;
+}
+
+.navbar-links a:hover::after {
+  width: 100%;
 }
 
 /* Dropdown Menu */
 .navbar-dropdown {
   position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .navbar-dropdown-label {
-  color: white;
+  color: var(--text-secondary);
   font-weight: 500;
-  cursor: default;
-  display: inline-block;
-  transition: opacity 0.3s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s ease;
 }
 
 .navbar-dropdown:hover .navbar-dropdown-label {
-  opacity: 0.8;
+  color: var(--text-primary);
 }
 
 .navbar-submenu {
   list-style: none;
   margin: 0;
-  padding: 0.5rem 0;
+  padding: 0.5rem;
   position: absolute;
-  top: 100%;
-  left: 0;
-  background: rgba(102, 126, 234, 0.95);
-  border-radius: 0 0 4px 4px;
-  min-width: 160px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  margin-top: 0.5rem;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  min-width: 200px;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1001;
 }
+
+.navbar-dropdown:hover .navbar-submenu,
+.navbar-submenu:hover {
+  /* Keep open while hovering submenu */
+  opacity: 1;
+  visibility: visible;
+  top: calc(100% + 0px);
+  /* Slide up slightly */
+}
+
+/* Specific fix for React state based dropdowns if CSS hover isn't enough */
+.navbar-dropdown .navbar-submenu {
+  display: block;
+  /* React handles conditional rendering, but we need layout */
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
 
 .navbar-submenu li {
   padding: 0;
@@ -167,41 +150,86 @@
 
 .navbar-submenu a {
   display: block;
-  color: white;
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 400;
-  padding: 0.75rem 1.5rem;
-  transition: background 0.2s ease;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
 }
 
 .navbar-submenu a:hover {
-  background: rgba(118, 75, 162, 0.8);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.navbar-submenu a::after {
+  display: none;
+}
+
+/* No underline for dropdown items */
+
+/* User Menu Specifics */
+.user-dropdown .navbar-submenu {
+  left: auto;
+  right: 0;
+  transform: none;
+  min-width: 220px;
+}
+
+.user-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  /* Pill shape */
+  transition: all 0.2s ease;
+}
+
+.user-menu-trigger:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-focus);
+}
+
+.user-menu button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--accent-danger);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.user-menu button:hover {
+  background: rgba(255, 0, 97, 0.1);
 }
 
 @media (max-width: 768px) {
   .navbar-content {
     flex-direction: column;
-    gap: 1rem;
+    padding: 1rem;
+    height: auto;
+  }
+
+  .navbar {
+    height: auto;
   }
 
   .navbar-links {
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 1rem;
-  }
-
-  .navbar-title {
-    font-size: 1.2rem;
-  }
-
-  .navbar-links a {
-    font-size: 0.9rem;
-  }
-
-  .navbar-submenu {
-    min-width: 140px;
-  }
-
-  .navbar-submenu a {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
+    margin-top: 1rem;
   }
 }
