@@ -42,7 +42,7 @@ export default function ReportsPage() {
     }
   ];
 
-    const handleDownload = async (report) => {
+  const handleDownload = async (report) => {
     try {
       const res = await fetch(`/api/reports/${report.id}/download`, {
         method: "GET",
@@ -74,7 +74,7 @@ export default function ReportsPage() {
   return (
     <div className="app-container">
       <Navigation />
-      <div className="main-content">
+      <div className="main-content page-container">
         <div className="reports-container">
           <div className="reports-header">
             <h2>Generated Reports</h2>
@@ -107,7 +107,7 @@ export default function ReportsPage() {
                       <button
                         className="action-btn"
                         onClick={() => handleDownload(report)}
-                        >Download</button>
+                      >Download</button>
                     </td>
                   </tr>
                 ))}

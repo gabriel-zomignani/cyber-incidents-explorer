@@ -73,48 +73,26 @@ export default function Navigation() {
             <li
               className="navbar-dropdown user-dropdown"
               ref={userMenuRef}
-              style={{ position: "relative" }}
             >
               <button
                 className="user-menu-trigger"
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "white",
-                  fontWeight: 500,
-                  fontSize: "1rem",
-                  cursor: "pointer",
-                  padding: "0.25rem 1.2rem 0.25rem 1.2rem",
-                  borderRadius: "4px"
-                }}
                 onClick={() => setUserMenuOpen((open) => !open)}
                 aria-haspopup="true"
                 aria-expanded={userMenuOpen}
               >
                 {user.username}
-                <span style={{ marginLeft: 8, fontSize: "0.9em" }}>▼</span>
+                <span style={{ fontSize: "0.8em", opacity: 0.7 }}>▼</span>
               </button>
               {userMenuOpen && (
-                <ul className="navbar-submenu user-menu" style={{ minWidth: 180, right: 0, left: "auto", marginTop: 8, padding: 0 }}>
-                  <li style={{ padding: 0, margin: 0 }}>
-                    <Link to="/change-password" style={{ padding: "0.75rem 1.5rem", display: "block", color: "white", textDecoration: "none", fontWeight: 400, fontSize: "1rem" }} onClick={() => setUserMenuOpen(false)}>
+                <ul className="navbar-submenu user-menu">
+                  <li>
+                    <Link to="/change-password" onClick={() => setUserMenuOpen(false)}>
                       Change Password
                     </Link>
                   </li>
-                  <li style={{ padding: 0, margin: 0 }}>
+                  <li>
                     <button
                       onClick={() => { setUserMenuOpen(false); handleLogout(); }}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "white",
-                        cursor: "pointer",
-                        fontSize: "1rem",
-                        fontWeight: 400,
-                        padding: "0.75rem 1.5rem",
-                        width: "100%",
-                        textAlign: "left"
-                      }}
                     >
                       Logout
                     </button>

@@ -1,6 +1,6 @@
 .reports-container {
     padding: 2rem;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     width: 100%;
 }
@@ -14,63 +14,61 @@
 
 .reports-header h2 {
     font-size: 2rem;
-    color: #1a202c;
-    /* Darker for better contrast */
+    color: var(--text-primary);
     margin: 0;
     font-weight: 700;
     letter-spacing: -0.025em;
 }
 
 .reports-table-container {
-    background: white;
-    border-radius: 16px;
-    /* Softer corners */
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    /* Richer shadow */
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
     overflow: hidden;
-    border: 1px solid #edf2f7;
+    border: 1px solid var(--border-subtle);
 }
 
 .reports-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     text-align: left;
 }
 
 .reports-table th,
 .reports-table td {
     padding: 1.25rem 1.5rem;
-    /* More breathing room */
-    border-bottom: 1px solid #edf2f7;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .reports-table th {
-    background-color: #f7fafc;
+    background-color: var(--bg-panel);
     font-weight: 600;
-    color: #4a5568;
+    color: var(--text-secondary);
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
 }
 
 .reports-table td {
-    color: #2d3748;
-    /* Darker text for readability */
+    color: var(--text-primary);
     font-size: 0.95rem;
 }
 
 .report-name-cell {
     font-weight: 600;
-    color: #2d3748;
+    color: var(--text-primary);
 }
 
 .report-desc-cell {
-    color: #718096;
+    color: var(--text-secondary);
+    max-width: 400px;
 }
 
 .report-date-cell {
-    color: #4a5568;
-    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
 }
 
 .reports-table tr:last-child td {
@@ -78,7 +76,7 @@
 }
 
 .reports-table tr:hover {
-    background-color: #f7fafc;
+    background-color: var(--bg-hover);
     transition: background-color 0.2s ease;
 }
 
@@ -90,37 +88,44 @@
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
+    border: 1px solid transparent;
 }
 
 .status-completed {
-    background-color: #c6f6d5;
-    color: #22543d;
+    background-color: rgba(0, 224, 184, 0.1);
+    color: var(--accent-success);
+    border-color: rgba(0, 224, 184, 0.2);
 }
 
 .status-pending {
-    background-color: #feebc8;
-    color: #744210;
+    background-color: rgba(245, 166, 35, 0.1);
+    color: var(--accent-warning);
+    border-color: rgba(245, 166, 35, 0.2);
 }
 
 .action-btn {
     padding: 0.5rem 1rem;
-    background-color: white;
-    color: #4a5568;
-    border: 1px solid #cbd5e0;
-    border-radius: 6px;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 0.875rem;
     font-weight: 500;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    margin-right: 0.5rem;
+}
+
+.action-btn:last-child {
+    margin-right: 0;
 }
 
 .action-btn:hover {
-    background-color: #f7fafc;
-    border-color: #a0aec0;
-    color: #2d3748;
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 112, 243, 0.3);
 }
 
 .action-btn:active {
