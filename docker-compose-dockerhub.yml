@@ -1,0 +1,48 @@
+services:
+  # Flask API Backend
+  api:
+    image: pablomtu/cyber-api:latest
+    container_name: cyber-events-api
+    ports:
+      - "5000:5000"
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-ollama/gpt-oss:120b-cloud}
+    volumes:
+      # Mount SQLite database
+      - ./db:/app/db:rw
+      # Mount code for hot reload in development
+      - ./api:/app/api:ro
+      - ./ai_engine:/app/ai_engine:ro
+      # Mount reports output
+      - ./reports:/app/reports:rw
+    networks:
+      - cyber-events-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React UI Frontend
+  ui:
+    image: pablomtu/cyber-ui:latest
+    container_name: cyber-events-ui
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    volumes:
+      # Mount UI code for hot reload in development
+      - ./ui:/app:rw
+      - /app/node_modules
+    networks:
+      - cyber-events-network
+    depends_on:
+      - api
+    restart: unless-stopped
+
+networks:
+  cyber-events-network:
+    driver: bridge
