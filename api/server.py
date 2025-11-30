@@ -8,6 +8,7 @@ import sys
 import os
 from pathlib import Path
 from datetime import datetime
+import json
 
 # Add parent directory to path to import ai_engine
 sys.path.append(str(Path(__file__).parent.parent))
@@ -20,8 +21,9 @@ import threading
 import uuid
 from typing import Dict
 
-# Reports directory (mounted via Docker or local)
+# Reports directory and metadata
 REPORTS_DIR = (Path(__file__).parent.parent / "reports").resolve()
+METADATA_FILE = REPORTS_DIR / "metadata.json"
 
 # In-memory job store for async analysis (simple single-instance approach)
 JOBS: Dict[str, dict] = {}
@@ -172,40 +174,133 @@ def _humanize_filename(filename: str) -> str:
     return friendly.title() if friendly else filename
 
 
+def _load_metadata():
+    """Load metadata list from JSON file, returning an empty list on error."""
+    if not METADATA_FILE.exists():
+        return []
+    try:
+        with METADATA_FILE.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
+def _build_entry_from_file(path: Path):
+    """Create a default metadata entry from a filesystem file."""
+    try:
+        mtime = datetime.fromtimestamp(path.stat().st_mtime).isoformat()
+    except Exception:
+        mtime = None
+
+    display_name = _humanize_filename(path.name)
+    entry = {
+        'id': path.name,
+        'fileName': path.name,
+        'displayName': display_name,
+        'name': display_name,  # backward-compat alias
+        'description': 'Generated report from ETL pipeline',
+        'dateGenerated': mtime,
+        'status': 'Completed'
+    }
+    return entry
+
+
+def _merge_reports():
+    """Merge filesystem reports with metadata."""
+    reports = []
+    metadata = _load_metadata()
+    meta_by_file = {}
+    meta_by_id = {}
+    for m in metadata:
+        if not isinstance(m, dict):
+            continue
+        fid = m.get('id') or m.get('fileName')
+        fname = m.get('fileName')
+        if fname:
+            meta_by_file[fname] = m
+        if fid:
+            meta_by_id[fid] = m
+
+    seen = set()
+    if REPORTS_DIR.exists() and REPORTS_DIR.is_dir():
+        for f in REPORTS_DIR.iterdir():
+            if not f.is_file():
+                continue
+            base = _build_entry_from_file(f)
+            meta = meta_by_file.get(f.name) or meta_by_id.get(f.name)
+            if meta:
+                merged = {**base, **meta}
+                merged['id'] = meta.get('id') or base['id']
+                merged['fileName'] = meta.get('fileName') or base['fileName']
+                merged['displayName'] = merged.get('displayName') or merged.get('name') or base['displayName']
+                merged['name'] = merged.get('displayName')
+                merged['description'] = merged.get('description') or base['description']
+                merged['dateGenerated'] = merged.get('dateGenerated') or base['dateGenerated']
+                merged['status'] = merged.get('status') or base['status']
+            else:
+                merged = base
+
+            reports.append(merged)
+            seen.add(merged['id'])
+            seen.add(merged['fileName'])
+
+    # Include metadata entries that reference missing files, marked as missing
+    for m in metadata:
+        if not isinstance(m, dict):
+            continue
+        fid = m.get('id') or m.get('fileName')
+        fname = m.get('fileName')
+        if fid in seen or fname in seen:
+            continue
+        fid = fid or f"missing-{len(reports)}"
+        display = m.get('displayName') or _humanize_filename(fname or fid or "Report")
+        reports.append({
+            'id': fid,
+            'fileName': fname,
+            'displayName': display,
+            'name': display,
+            'description': m.get('description') or 'Metadata present, file missing',
+            'dateGenerated': m.get('dateGenerated'),
+            'status': m.get('status') or 'Missing'
+        })
+
+    return reports
+
+
 @app.route('/api/reports', methods=['GET'])
 def list_reports():
     """List available report files from the reports directory."""
-    if not REPORTS_DIR.exists() or not REPORTS_DIR.is_dir():
-        return jsonify({'reports': []})
+    return jsonify({'reports': _merge_reports()})
 
-    reports = []
-    for f in REPORTS_DIR.iterdir():
-        if not f.is_file():
-            continue
-        try:
-            mtime = datetime.fromtimestamp(f.stat().st_mtime).isoformat()
-        except Exception:
-            mtime = None
-        reports.append({
-            'id': f.name,
-            'name': _humanize_filename(f.name),
-            'description': 'Generated report from ETL pipeline',
-            'dateGenerated': mtime,
-            'status': 'Completed'
-        })
 
-    return jsonify({'reports': reports})
+@app.route('/api/reports/<report_id>', methods=['GET'])
+def get_report(report_id):
+    """Return metadata for a single report."""
+    reports = _merge_reports()
+    for r in reports:
+        if r.get('id') == report_id:
+            return jsonify({'report': r})
+    return jsonify({'success': False, 'error': 'Report not found'}), 404
 
 
 @app.route('/api/reports/<report_id>/download', methods=['GET'])
 def download_report(report_id):
     """Download a specific report file by id (filename)."""
+    # Map the id to the actual file name using metadata if present
+    entry = None
+    for r in _merge_reports():
+        if r.get('id') == report_id:
+            entry = r
+            break
+
+    file_name = entry.get('fileName') if entry else report_id
     # Prevent path traversal by resolving and ensuring directory containment
-    target_path = (REPORTS_DIR / report_id).resolve()
+    target_path = (REPORTS_DIR / file_name).resolve()
     if not str(target_path).startswith(str(REPORTS_DIR)) or not target_path.is_file():
         return jsonify({'success': False, 'error': 'Report not found'}), 404
 
-    return send_from_directory(REPORTS_DIR, report_id, as_attachment=True)
+    return send_from_directory(REPORTS_DIR, target_path.name, as_attachment=True)
 
 if __name__ == '__main__':
     ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
