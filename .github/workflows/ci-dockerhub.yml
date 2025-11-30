@@ -60,7 +60,7 @@ jobs:
 
       - name: Install UI deps
         working-directory: ui
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Build UI
         working-directory: ui
