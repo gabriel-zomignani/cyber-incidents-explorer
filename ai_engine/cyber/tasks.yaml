@@ -1,27 +1,86 @@
-analysis_task:
+data_collection_task:
   description: >
-    Analyze the cyber incidents database to answer: {question}
+    Query the database to answer: {question}
     
-    Use the available database tools strategically:
-    - query_cyber_data: Get overview, top countries, top attack types
-    - temporal_analysis: Examine time-based trends and patterns
-    - geographic_analysis: Analyze regional distribution and country-specific patterns
-    - correlation_analysis: Find relationships between different attributes
-    - get_summary_statistics: Get comprehensive dataset statistics
+    INSTRUCTIONS:
+    1. Determine which tool(s) to call based on the question
+    2. Execute the tool(s) with appropriate parameters
+    3. Return ALL raw tool outputs without interpretation
     
-    Provide a clear, well-structured answer that includes:
-    1. Direct answer to the question with supporting data
-    2. Key patterns and trends discovered
-    3. Relevant statistics and metrics
-    4. Strategic insights and implications
-    5. Conclusions and recommendations
+    DO NOT analyze, summarize, or interpret. Just execute and return data.
     
-    Format the response to be accessible to both technical and executive audiences.
   expected_output: >
-    A comprehensive analysis report containing:
-    - Executive summary with direct answer to the question
-    - Supporting data, statistics, and evidence from the database
-    - Key findings and patterns (temporal, geographic, correlations as relevant)
-    - Strategic insights and implications
-    - Clear conclusions and actionable recommendations
-    - Professional formatting suitable for stakeholders
+    Raw tool execution results formatted as:
+    
+    Tool: [tool_name]
+    Parameters: [parameters used]
+    Results:
+    [complete raw output from tool]
+
+data_analysis_task:
+  description: >
+    Analyze the raw data from the data_collection_task to answer: {question}
+    
+    You will receive tool outputs. Your job is to:
+    1. Extract key numbers (totals, counts, percentages)
+    2. Calculate growth rates and comparisons
+    3. Identify top items (countries, actors, event types)
+    4. Spot trends and patterns
+    5. Note any anomalies or significant findings
+    
+    DO NOT write a full report - just provide structured analysis.
+    
+  expected_output: >
+    Structured analysis including:
+    
+    ## Key Statistics
+    - Total incidents: [number]
+    - Top country: [country] ([number] incidents, [X%])
+    - Dominant event type: [type] ([X%])
+    - Dominant actor type: [type] ([X%])
+    
+    ## Trends
+    - Year-over-year change: [+/-X%]
+    
+    ## Geographic Patterns
+    [Top 5 countries with counts and percentages]
+    
+    ## Threat Landscape  
+    [Event type breakdown]
+    [Actor type breakdown]
+    
+    ## Notable Observations
+    [Anything significant]
+
+report_writing_task:
+  description: >
+    Create a professional cybersecurity analysis report to answer: {question}
+    
+    You will receive structured analysis from the data_analysis_task.
+    Transform it into an executive-ready report.
+    
+  expected_output: >
+    A complete markdown-formatted report with:
+    
+    # Cyber Incident Analysis Report - [Topic]
+    
+    ## Executive Summary
+    [Direct answer to question + 2-3 key findings]
+    
+    ## Key Findings  
+    [Table or structured list of core statistics]
+    
+    ## Detailed Analysis
+    ### Temporal Trends
+    ### Geographic Distribution
+    ### Threat Actor Profile  
+    ### Event Type Breakdown
+    
+    ## Strategic Insights
+    [4-5 implications and observations]
+    
+    ## Actionable Recommendations
+    | Recommendation | Rationale | Priority |
+    
+    ## Conclusion
+    [Brief wrap-up]
