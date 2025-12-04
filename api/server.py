@@ -90,8 +90,6 @@ def analyze_question():
             }), 400
         
         # Initialize and run the crew
-        # Note: This can take 1-2 minutes depending on question complexity
-        # First-time runs may take longer as Ollama loads the model into memory
         print(f"Analyzing question: {question}")
         print("Initializing CrewAI agents...")
         crew = CyberAnalysisCrew()
@@ -139,7 +137,7 @@ def analyze_question():
 
 @app.route('/api/analyze_async', methods=['POST'])
 def analyze_async():
-    """Start analysis in background and return a job id immediately."""
+
     try:
         data = request.json
         question = data.get('question', '').strip()
@@ -197,7 +195,7 @@ def analyze_async():
 
 @app.route('/api/analyze_status/<job_id>', methods=['GET'])
 def analyze_status(job_id):
-    """Return status and result (if ready) for a background job."""
+
     with JOBS_LOCK:
         job = JOBS.get(job_id)
     if not job:
@@ -215,30 +213,22 @@ def analyze_status(job_id):
 def get_example_questions():
     """Get example questions users can ask"""
     examples = [
-        "What are the trends in cyber attacks from 2014 to 2024?",
-        "Which countries experience the most state-sponsored attacks?",
-        "What is the relationship between actor type and attack motive?",
-        "Which industries are most frequently targeted by criminal actors?",
-        "Are there seasonal patterns in ransomware attacks?",
-        "Compare cyber incident patterns between NATO and non-NATO countries",
-        "What attack types were most common in 2020 vs 2023?",
-        "Which regions are most targeted by hacktivist groups?"
+        "What are the trends in cyber attacks in August 2018?",
+        "Analyze cyber incident patterns in EU region in 2024",
     ]
     
     return jsonify({
         'examples': examples
     })
 
-
+#Convert a filename into a friendlier display name.
 def _humanize_filename(filename: str) -> str:
-    """Convert a filename into a friendlier display name."""
     stem = Path(filename).stem
     friendly = stem.replace('_', ' ').replace('-', ' ').strip()
     return friendly.title() if friendly else filename
 
-
+#Load metadata list from JSON file, returning an empty list on error.
 def _load_metadata():
-    """Load metadata list from JSON file, returning an empty list on error."""
     if not METADATA_FILE.exists():
         return []
     try:
@@ -249,8 +239,8 @@ def _load_metadata():
         return []
 
 
+#Create a default metadata entry from a filesystem file.
 def _build_entry_from_file(path: Path):
-    """Create a default metadata entry from a filesystem file."""
     try:
         mtime = datetime.fromtimestamp(path.stat().st_mtime).isoformat()
     except Exception:
@@ -269,8 +259,8 @@ def _build_entry_from_file(path: Path):
     return entry
 
 
+#Merge filesystem report files with metadata entries.
 def _merge_reports():
-    """Merge filesystem reports with metadata."""
     reports = []
     metadata = _load_metadata()
     meta_by_file = {}
@@ -332,16 +322,14 @@ def _merge_reports():
     reports.sort(key=lambda r: r.get('dateGenerated') or '', reverse=True)
     return reports
 
-
+#List available report files from the reports directory.
 @app.route('/api/reports', methods=['GET'])
 def list_reports():
-    """List available report files from the reports directory."""
     return jsonify({'reports': _merge_reports()})
 
-
+#Return metadata for a single report.
 @app.route('/api/reports/<report_id>', methods=['GET'])
 def get_report(report_id):
-    """Return metadata for a single report."""
     reports = _merge_reports()
     for r in reports:
         if r.get('id') == report_id:
@@ -349,9 +337,9 @@ def get_report(report_id):
     return jsonify({'success': False, 'error': 'Report not found'}), 404
 
 
+#Download a specific report file by id (filename).
 @app.route('/api/reports/<report_id>/download', methods=['GET'])
 def download_report(report_id):
-    """Download a specific report file by id (filename)."""
     # Map the id to the actual file name using metadata if present
     entry = None
     for r in _merge_reports():
@@ -368,10 +356,8 @@ def download_report(report_id):
     return send_from_directory(REPORTS_DIR, target_path.name, as_attachment=True)
 
 if __name__ == '__main__':
-    ollama_host = os.getenv('OLLAMA_URL', 'http://localhost:11434')
-    ollama_model = os.getenv('OLLAMA_MODEL', 'ollama/gpt-oss:120b-cloud')
     print("Starting Cyber Security Events Analysis API...")
-    print(f"Using Ollama LLM at: {ollama_host}")
-    print(f"Model: {ollama_model}")
+    print(f"Using Ollama LLM at: {os.getenv('OLLAMA_URL')}")
+    print(f"Model: {os.getenv('OLLAMA_MODEL')}")
     print("API will be available at http://localhost:5000")
     app.run(debug=True, port=5000, host='0.0.0.0')

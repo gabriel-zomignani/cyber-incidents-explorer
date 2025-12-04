@@ -69,7 +69,7 @@ export default function PieChartView() {
         }
       }
 
-      return matchesCountry && matchesDate && row[selectedFeature]; // Only include rows with the selected feature
+      return matchesCountry && matchesDate && row[selectedFeature]; 
     });
   }, [data, selectedCountry, selectedFeature, startDate, endDate]);
 
@@ -89,7 +89,7 @@ export default function PieChartView() {
     const node = reportRef.current;
     if (!node) return;
 
-    // Ensure current layout is fully rendered before capture
+    
     await new Promise((r) => setTimeout(r, 0));
 
     const canvas = await html2canvas(node, {

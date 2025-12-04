@@ -123,7 +123,7 @@ export default function AIPage() {
                     const imgWidth = canvas.width;
                     const imgHeight = canvas.height;
 
-                    // Create PDF in points (pt). jsPDF default unit is 'pt' when using 'pt'.
+                    
                     const pdf = new jsPDF('p', 'pt', 'a4');
                     const pdfWidth = pdf.internal.pageSize.getWidth();
                     const pdfHeight = pdf.internal.pageSize.getHeight();
