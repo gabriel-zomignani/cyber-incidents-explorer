@@ -8,10 +8,9 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 
 from .tools.cyber_data_tools import (
-    query_cyber_data,
+    QueryCyberIncidentsTool,
     temporal_analysis,
     geographic_analysis,
-    correlation_analysis,
     get_summary_statistics
 )
 
@@ -38,56 +37,101 @@ class CyberAnalysisCrew():
         
         # Initialize LLM - using Ollama with configurable model
         # Deepseek has better reasoning capabilities than llama3.1
-        ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
+        ollama_host = os.getenv('OLLAMA_URL', 'http://localhost:11434')
         ollama_model = os.getenv('OLLAMA_MODEL', 'ollama/gpt-oss:120b-cloud')
         self.llm = LLM(
             model=ollama_model,  # CrewAI needs ollama/ prefix for LiteLLM routing
             base_url=ollama_host,
             api_key="no-key",  # Ollama doesn't need real key
-            temperature=0.7,
+            temperature=0.3,
             timeout=300  # 5 minute timeout for LLM calls (handles cold start)
         )
         
-        # Database query tools for the analyst
+        # Database query tools - return pre-aggregated statistics
         self.analysis_tools = [
-            query_cyber_data,
+            QueryCyberIncidentsTool(),
             temporal_analysis,
             geographic_analysis,
-            correlation_analysis,
             get_summary_statistics
         ]
     
     @agent
-    def cyber_analyst(self) -> Agent:
-        # Expert cybersecurity analyst with full database access
+    def data_collector(self) -> Agent:
+        # Database query specialist - ONLY calls tools
         return Agent(
-            config=self.agents_config['cyber_analyst'],
+            config=self.agents_config['data_collector'],
             llm=self.llm,
-            tools=self.analysis_tools,
-            verbose=True
+            tools=self.analysis_tools,  # HAS tools
+            verbose=True,
+            function_calling_llm=self.llm,
+            max_iter=5,
+            allow_delegation=False
+        )
+    
+    @agent
+    def data_analyst(self) -> Agent:
+        # Statistical analyst - NO tools, just analyzes data
+        return Agent(
+            config=self.agents_config['data_analyst'],
+            llm=self.llm,
+            tools=[],  # NO tools - works with provided data
+            verbose=True,
+            max_iter=3,
+            allow_delegation=False
+        )
+    
+    @agent
+    def report_writer(self) -> Agent:
+        # Report author - NO tools, just writes
+        return Agent(
+            config=self.agents_config['report_writer'],
+            llm=self.llm,
+            tools=[],  # NO tools - works with analysis
+            verbose=True,
+            max_iter=3,
+            allow_delegation=False
         )
     
     @task
-    def analysis_task(self) -> Task:
-        # Comprehensive analysis task
-        # Generate a timestamped report filename so runs do not overwrite previous reports
+    def data_collection_task(self) -> Task:
+        # Step 1: Query database
+        return Task(
+            config=self.tasks_config['data_collection_task'],
+            agent=self.data_collector()
+        )
+    
+    @task
+    def data_analysis_task(self) -> Task:
+        # Step 2: Analyze the data
+        return Task(
+            config=self.tasks_config['data_analysis_task'],
+            agent=self.data_analyst(),
+            context=[self.data_collection_task()]  # Receives output from data_collection
+        )
+    
+    @task
+    def report_writing_task(self) -> Task:
+        # Step 3: Write the report
         from datetime import datetime
         ts = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
         out_name = f'reports/cyber_analysis_report_{ts}.md'
         return Task(
-            config=self.tasks_config['analysis_task'],
-            agent=self.cyber_analyst(),
+            config=self.tasks_config['report_writing_task'],
+            agent=self.report_writer(),
+            context=[self.data_analysis_task()],  # Receives output from analysis
             output_file=out_name
         )
     
     @crew
     def crew(self) -> Crew:
-        # Assemble the streamlined crew with single expert agent
+        # 3-agent pipeline: collect → analyze → write
         return Crew(
-            agents=[self.cyber_analyst()],
-            tasks=[self.analysis_task()],
+            agents=[self.data_collector(), self.data_analyst(), self.report_writer()],
+            tasks=[self.data_collection_task(), self.data_analysis_task(), self.report_writing_task()],
             process=Process.sequential,
-            verbose=True
+            verbose=True,
+            share_crew=False,
+            enable_rpm_tracking=False
         )
     
     def kickoff(self, inputs: dict):

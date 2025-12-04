@@ -27,7 +27,14 @@ export default function ReportsPage() {
           throw new Error("Failed to load reports");
         }
         const data = await res.json();
-        setReports(Array.isArray(data?.reports) ? data.reports : []);
+        const reportsList = Array.isArray(data?.reports) ? data.reports : [];
+        // Sort by dateGenerated descending (newest first) as a backup
+        reportsList.sort((a, b) => {
+          const dateA = a.dateGenerated || '';
+          const dateB = b.dateGenerated || '';
+          return dateB.localeCompare(dateA);
+        });
+        setReports(reportsList);
       } catch (err) {
         console.error(err);
         setError("Could not load reports. Please try again.");

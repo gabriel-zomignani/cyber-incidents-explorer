@@ -29,6 +29,26 @@ METADATA_FILE = REPORTS_DIR / "metadata.json"
 JOBS: Dict[str, dict] = {}
 JOBS_LOCK = threading.Lock()
 
+def _save_report_metadata(filename: str, question: str):
+    """Save metadata for a generated report."""
+    try:
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        metadata = _load_metadata()
+        
+        # Add new report metadata
+        metadata.append({
+            'id': filename,
+            'fileName': filename,
+            'description': question,
+            'dateGenerated': datetime.utcnow().isoformat(),
+            'status': 'Completed'
+        })
+        
+        with open(METADATA_FILE, 'w') as f:
+            json.dump(metadata, f, indent=2)
+    except Exception as e:
+        print(f"Error saving metadata: {e}")
+
 # Configure longer timeout for AI analysis requests
 # First-time Ollama model loading can take 30-60 seconds
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -77,8 +97,28 @@ def analyze_question():
         crew = CyberAnalysisCrew()
         
         print("Starting analysis (this may take 1-2 minutes)...")
-        result = crew.kickoff(inputs={'question': question})
+        # Suppress interactive prompts by redirecting stdin
+        import sys, os
+        old_stdin = sys.stdin
+        try:
+            sys.stdin = open(os.devnull, 'r')
+            result = crew.kickoff(inputs={'question': question})
+        finally:
+            sys.stdin = old_stdin
         print("Analysis complete!")
+        
+        # Extract filename and save metadata
+        filename = None
+        try:
+            if hasattr(result, 'tasks_output') and result.tasks_output:
+                last_task = result.tasks_output[-1]
+                if hasattr(last_task, 'output_file') and last_task.output_file:
+                    filename = Path(last_task.output_file).name
+        except Exception:
+            pass
+        
+        if filename:
+            _save_report_metadata(filename, question)
         
         return jsonify({
             'success': True,
@@ -111,11 +151,34 @@ def analyze_async():
             JOBS[job_id] = {'status': 'pending', 'result': None, 'error': None}
 
         def run_job(jid, q):
+            import sys, os
             try:
                 with JOBS_LOCK:
                     JOBS[jid]['status'] = 'running'
                 crew = CyberAnalysisCrew()
-                res = crew.kickoff(inputs={'question': q})
+                # Suppress interactive prompts
+                old_stdin = sys.stdin
+                try:
+                    sys.stdin = open(os.devnull, 'r')
+                    res = crew.kickoff(inputs={'question': q})
+                finally:
+                    sys.stdin = old_stdin
+                
+                # Extract filename from crew result if available
+                # CrewAI returns a CrewOutput object with tasks_output list
+                filename = None
+                try:
+                    if hasattr(res, 'tasks_output') and res.tasks_output:
+                        last_task = res.tasks_output[-1]
+                        if hasattr(last_task, 'output_file') and last_task.output_file:
+                            filename = Path(last_task.output_file).name
+                except Exception:
+                    pass
+                
+                # Save metadata with the question
+                if filename:
+                    _save_report_metadata(filename, q)
+                
                 with JOBS_LOCK:
                     JOBS[jid]['status'] = 'done'
                     JOBS[jid]['result'] = str(res)
@@ -199,7 +262,7 @@ def _build_entry_from_file(path: Path):
         'fileName': path.name,
         'displayName': display_name,
         'name': display_name,  # backward-compat alias
-        'description': 'Generated report from ETL pipeline',
+        'description': 'AI-generated cyber security analysis report',
         'dateGenerated': mtime,
         'status': 'Completed'
     }
@@ -265,6 +328,8 @@ def _merge_reports():
             'status': m.get('status') or 'Missing'
         })
 
+    # Sort by dateGenerated descending (newest first)
+    reports.sort(key=lambda r: r.get('dateGenerated') or '', reverse=True)
     return reports
 
 
@@ -303,7 +368,7 @@ def download_report(report_id):
     return send_from_directory(REPORTS_DIR, target_path.name, as_attachment=True)
 
 if __name__ == '__main__':
-    ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
+    ollama_host = os.getenv('OLLAMA_URL', 'http://localhost:11434')
     ollama_model = os.getenv('OLLAMA_MODEL', 'ollama/gpt-oss:120b-cloud')
     print("Starting Cyber Security Events Analysis API...")
     print(f"Using Ollama LLM at: {ollama_host}")

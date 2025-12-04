@@ -204,6 +204,11 @@
   margin-top: 1.5rem;
 }
 
+/* Override base content-card width for AI page */
+.content-card.content-card--wide {
+  max-width: 1200px;
+}
+
 /* Wide content cards on medium/smaller screens */
 @media (max-width: 1024px) {
   .content-card.content-card--wide {
