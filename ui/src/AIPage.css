@@ -1,5 +1,3 @@
-/* AI page styles */
-
 .ai-form {
   display: flex;
   flex-direction: column;
@@ -188,7 +186,7 @@
   text-align: left;
 }
 
-/* Safety: force text to wrap within container */
+/* force text to wrap within container */
 .ai-result-box,
 .ai-result-box * {
   max-width: 100%;

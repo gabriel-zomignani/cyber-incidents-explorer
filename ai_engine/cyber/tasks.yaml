@@ -2,52 +2,31 @@ data_collection_task:
   description: >
     Query the database to answer: {question}
     
-    INSTRUCTIONS:
-    1. Determine which tool(s) to call based on the question
-    2. Execute the tool(s) with appropriate parameters
-    3. Return ALL raw tool outputs without interpretation
+    CRITICAL - You MUST call tools with the exact parameters from the question:
+    - If question mentions years (e.g., "2020 to 2024"), use start_year=2020, end_year=2024
+    - If question mentions a specific year (e.g., "2020"), use year=2020
+    - If question mentions regions (NATO, EU, G7, G20), use region="nato", region="eu", etc.
+    - If question mentions countries, use country="country_name"
     
-    DO NOT analyze, summarize, or interpret. Just execute and return data.
+    Execute ALL relevant tools and return their complete outputs.
     
   expected_output: >
-    Raw tool execution results formatted as:
-    
-    Tool: [tool_name]
-    Parameters: [parameters used]
-    Results:
-    [complete raw output from tool]
+    Complete raw output from each tool called, including all numbers and statistics.
 
 data_analysis_task:
   description: >
-    Analyze the raw data from the data_collection_task to answer: {question}
+    Analyze the data from data_collection_task to answer: {question}
     
-    You will receive tool outputs. Your job is to:
-    1. Extract key numbers (totals, counts, percentages)
-    2. Calculate growth rates and comparisons
-    3. Identify top items (countries, actors, event types)
-    4. Spot trends and patterns
-    5. Note any anomalies or significant findings
-    
-    DO NOT write a full report - just provide structured analysis.
+    Extract actual numbers from the tool outputs - DO NOT use placeholders like [number] or [X%].
+    Calculate percentages, identify trends, find top items.
     
   expected_output: >
-    Structured analysis including:
-    
-    ## Key Statistics
-    - Total incidents: [number]
-    - Top country: [country] ([number] incidents, [X%])
-    - Dominant event type: [type] ([X%])
-    - Dominant actor type: [type] ([X%])
-    
-    ## Trends
-    - Year-over-year change: [+/-X%]
-    
-    ## Geographic Patterns
-    [Top 5 countries with counts and percentages]
-    
-    ## Threat Landscape  
-    [Event type breakdown]
-    [Actor type breakdown]
+    Analysis with REAL numbers from the data:
+    - Total incidents: (actual count)
+    - Top countries with counts and percentages
+    - Event types with distributions
+    - Actor types with distributions
+    - Year-over-year trends (if applicable)
     
     ## Notable Observations
     [Anything significant]

@@ -5,10 +5,10 @@ from pathlib import Path
 import pandas as pd
 from sqlalchemy import create_engine
 from crewai.tools import BaseTool, tool
-from typing import Optional, Type
+from typing import Optional, Type, Annotated
 from pydantic import BaseModel, Field
 
-# Path to the SQLite database
+
 DB_PATH = Path(__file__).parent.parent.parent.parent / "db" / "cyber.db"
 DB_URL = f"sqlite:///{DB_PATH}"
 
@@ -64,14 +64,14 @@ def _load_filtered_data(year=0, month=0, country="", event_type="", actor_type="
 
 class QueryCyberIncidentsInput(BaseModel):
     """Input for QueryCyberIncidents tool."""
-    year: int = Field(default=0, description="Filter by specific year (e.g. 2023) or 0 for all years")
-    month: int = Field(default=0, description="Filter by month (1-12) or 0 for all months")
-    country: str = Field(default="", description="Filter by country name or empty for all countries")
-    event_type: str = Field(default="", description="Filter by event type or empty for all types")
-    actor_type: str = Field(default="", description="Filter by actor type or empty for all types")
-    region: str = Field(default="", description="Filter by region - valid values: eu, nato, g7, g20, etc.")
-    start_date: str = Field(default="", description="Filter from date (YYYY-MM-DD) or empty")
-    end_date: str = Field(default="", description="Filter to date (YYYY-MM-DD) or empty")
+    year: int = 0
+    month: int = 0
+    country: str = ""
+    event_type: str = ""
+    actor_type: str = ""
+    region: str = ""
+    start_date: str = ""
+    end_date: str = ""
 
 
 class QueryCyberIncidentsTool(BaseTool):
@@ -152,29 +152,15 @@ class QueryCyberIncidentsTool(BaseTool):
 
 
 @tool("Temporal Analysis")
-def temporal_analysis(start_year: Optional[int] = None, end_year: Optional[int] = None, region: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> str:
-    """
-    Get temporal trends and year-over-year statistics.
-    Returns incident counts by year, month, and growth rates.
-
-    Args:
-        start_year: Start year (optional)
-        end_year: End year (optional)
-        region: Filter by region (optional)
-        start_date: Filter from date "YYYY-MM-DD" (optional)
-        end_date: Filter to date "YYYY-MM-DD" (optional)
-
-    Returns:
-        Year-by-year statistics and trends
-    """
+def temporal_analysis(
+    start_year: Annotated[int, Field(default=0)] = 0,
+    end_year: Annotated[int, Field(default=0)] = 0,
+    region: Annotated[str, Field(default="")] = "",
+    start_date: Annotated[str, Field(default="")] = "",
+    end_date: Annotated[str, Field(default="")] = ""
+) -> str:
+    """Get temporal trends and year-over-year statistics."""
     try:
-        # Handle None defaults
-        start_year = start_year or 0
-        end_year = end_year or 0
-        region = region or ""
-        start_date = start_date or ""
-        end_date = end_date or ""
-        
         df = _load_filtered_data(region=region, start_date=start_date, end_date=end_date)
         
         if df.empty:
@@ -218,29 +204,15 @@ def temporal_analysis(start_year: Optional[int] = None, end_year: Optional[int] 
 
 
 @tool("Geographic Analysis")
-def geographic_analysis(year: Optional[int] = None, month: Optional[int] = None, region: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> str:
-    """
-    Get geographic distribution and regional statistics.
-    Returns incidents by country, region memberships, and geographic patterns.
-
-    Args:
-        year: Filter by specific year (optional)
-        month: Filter by month 1-12 (optional)
-        region: Filter by specific region (optional)
-        start_date: Filter from date "YYYY-MM-DD" (optional)
-        end_date: Filter to date "YYYY-MM-DD" (optional)
-
-    Returns:
-        Geographic distributions and regional analysis
-    """
+def geographic_analysis(
+    year: Annotated[int, Field(default=0)] = 0,
+    month: Annotated[int, Field(default=0)] = 0,
+    region: Annotated[str, Field(default="")] = "",
+    start_date: Annotated[str, Field(default="")] = "",
+    end_date: Annotated[str, Field(default="")] = ""
+) -> str:
+    """Get geographic distribution and regional statistics."""
     try:
-        # Handle None defaults
-        year = year or 0
-        month = month or 0
-        region = region or ""
-        start_date = start_date or ""
-        end_date = end_date or ""
-        
         df = _load_filtered_data(year=year, month=month, region=region, start_date=start_date, end_date=end_date)
         
         if df.empty:
@@ -282,13 +254,7 @@ def geographic_analysis(year: Optional[int] = None, month: Optional[int] = None,
 
 @tool("Get Summary Statistics")
 def get_summary_statistics() -> str:
-    """
-    Get overall dataset statistics and high-level summary.
-    Returns total counts, date ranges, and key distributions.
-
-    Returns:
-        Overall dataset statistics
-    """
+    """Get overall dataset statistics and high-level summary."""
     try:
         df = _load_filtered_data()
         

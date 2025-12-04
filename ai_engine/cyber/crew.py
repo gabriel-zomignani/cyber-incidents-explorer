@@ -1,6 +1,3 @@
-# Cyber Incident Analysis Crew
-# CrewAI-based system for analyzing cyber security incident patterns and trends.
-
 import os
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
@@ -18,8 +15,6 @@ load_dotenv()
 
 @CrewBase
 class CyberAnalysisCrew():
-    # Cyber Incident Analysis Crew
-    # These will be overridden in __init__
     agents_config = 'agents.yaml'
     tasks_config = 'tasks.yaml'
 
@@ -28,26 +23,25 @@ class CyberAnalysisCrew():
         import pathlib
         config_dir = pathlib.Path(__file__).parent
         
-        # Load configs directly - don't use decorator paths
+        # Loads configs directly
         import yaml
         with open(config_dir / 'agents.yaml', 'r') as f:
             self.agents_config = yaml.safe_load(f)
         with open(config_dir / 'tasks.yaml', 'r') as f:
             self.tasks_config = yaml.safe_load(f)
         
-        # Initialize LLM - using Ollama with configurable model
-        # Deepseek has better reasoning capabilities than llama3.1
-        ollama_host = os.getenv('OLLAMA_URL', 'http://localhost:11434')
-        ollama_model = os.getenv('OLLAMA_MODEL', 'ollama/gpt-oss:120b-cloud')
+        # Initialize LLM 
+        ollama_host = os.getenv('OLLAMA_URL')
+        ollama_model = os.getenv('OLLAMA_MODEL')
         self.llm = LLM(
-            model=ollama_model,  # CrewAI needs ollama/ prefix for LiteLLM routing
+            model=ollama_model, 
             base_url=ollama_host,
-            api_key="no-key",  # Ollama doesn't need real key
+            api_key="no-key", 
             temperature=0.3,
-            timeout=300  # 5 minute timeout for LLM calls (handles cold start)
+            timeout=300  
         )
         
-        # Database query tools - return pre-aggregated statistics
+        # Initialize tools
         self.analysis_tools = [
             QueryCyberIncidentsTool(),
             temporal_analysis,
@@ -57,11 +51,11 @@ class CyberAnalysisCrew():
     
     @agent
     def data_collector(self) -> Agent:
-        # Database query specialist - ONLY calls tools
+        # Database query specialist 
         return Agent(
             config=self.agents_config['data_collector'],
             llm=self.llm,
-            tools=self.analysis_tools,  # HAS tools
+            tools=self.analysis_tools,  
             verbose=True,
             function_calling_llm=self.llm,
             max_iter=5,
@@ -70,7 +64,7 @@ class CyberAnalysisCrew():
     
     @agent
     def data_analyst(self) -> Agent:
-        # Statistical analyst - NO tools, just analyzes data
+        # Statistical analyst 
         return Agent(
             config=self.agents_config['data_analyst'],
             llm=self.llm,
@@ -82,11 +76,11 @@ class CyberAnalysisCrew():
     
     @agent
     def report_writer(self) -> Agent:
-        # Report author - NO tools, just writes
+        # Report author 
         return Agent(
             config=self.agents_config['report_writer'],
             llm=self.llm,
-            tools=[],  # NO tools - works with analysis
+            tools=[],  
             verbose=True,
             max_iter=3,
             allow_delegation=False
@@ -124,7 +118,6 @@ class CyberAnalysisCrew():
     
     @crew
     def crew(self) -> Crew:
-        # 3-agent pipeline: collect → analyze → write
         return Crew(
             agents=[self.data_collector(), self.data_analyst(), self.report_writer()],
             tasks=[self.data_collection_task(), self.data_analysis_task(), self.report_writing_task()],
@@ -135,9 +128,4 @@ class CyberAnalysisCrew():
         )
     
     def kickoff(self, inputs: dict):
-        # Execute the crew analysis
-        # Args:
-        #     inputs: Dictionary containing 'question' - the analysis question to answer
-        # Returns:
-        #     Analysis results from the crew
         return self.crew().kickoff(inputs=inputs)
